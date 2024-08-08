@@ -51,10 +51,10 @@ def add_order():
     db.commit()
 
 def income():
-    a = db.execute('''SELECT SUM(o.quantity * p.price) 
+    info = db.execute('''SELECT SUM(o.quantity * p.price) 
                FROM orders o 
                INNER JOIN products p ON p.product_id == o.product_id;''')
-    print(a.fetchone())
+    print(info.fetchone())
 
 def orders_by_customer():
     info = db.execute('''SELECT c.first_name, COUNT(o.order_id) 
@@ -69,6 +69,21 @@ def avg_order_price():
                       INNER JOIN products p ON o.product_id == p.product_id;''')
     print(info.fetchone())
 
+def popular_category():
+    info = db.execute('''SELECT p.category, COUNT(o.order_id) AS order_count
+                      FROM orders o
+                      INNER JOIN products p ON o.product_id == p.product_id
+                      GROUP BY p.category
+                      ORDER BY order_count DESC;''')
+    print(info.fetchone())
+
+def category_quantity():
+    info = db.execute('''SELECT COUNT(p.product_id) as amount, p.category 
+                      FROM products p 
+                      GROUP BY category
+                      ORDER BY amount DESC;''')
+    print(info.fetchall())
+
 def update_price():
     category = input("Category: ")
     db.execute('''UPDATE products
@@ -78,20 +93,17 @@ def update_price():
 
 while True:
     print('''
-Що ви хочете зробити?
-1 - Додавання продуктів:
-2 - Додавання клієнтів:
-3 - Замовлення товарів:
-4 - Сумарний обсяг продажів:
-5 - Кількість замовлень на кожного клієнта:
-6 - Середній чек замовлення:
-7 - Найбільш популярна категорія товарів:
-8 - Загальна кількість товарів кожної категорії:
-9 - Оновлення цін категорії на 10% більші:
-10 - Показати усіх користувачів
-11 - Показати усі продукти
-12 - Показати усі замовлення(Joined)
-0 - Вийти:''')
+Select an option:
+1 - Add a product
+2 - Add a client
+3 - Order an item
+4 - View total income
+5 - View orders amount for each client
+6 - View average order price
+7 - View the most popular category
+8 - View total quantity of products for each category
+9 - Update prices by 10%
+0 - Exit''')
     cmd = int(input("Choose an option: "))
 
     match cmd:
@@ -109,5 +121,9 @@ while True:
             orders_by_customer()
         case 6:
             avg_order_price()
+        case 7:
+            popular_category()
+        case 8:
+            category_quantity()
         case 9: 
             update_price()
