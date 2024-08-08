@@ -1,6 +1,8 @@
+#importing libs
 import sqlite3
 import datetime
 
+#connecting DB
 db = sqlite3.connect("online_store.db")
 
 # db.execute('''CREATE TABLE IF NOT EXISTS products (
@@ -23,8 +25,9 @@ db = sqlite3.connect("online_store.db")
 #           quantity INTEGER NOT NULL, 
 #           order_date DATE NOT NULL, 
 #           FOREIGN KEY (customer_id) REFERENCES customers(customer_id), 
-#           FOREIGN KEY (product_id) REFERENCES products(product_id) );''')
+#           FOREIGN KEY (product_id) REFERENCES products(product_id) );''') -Uncomment all of this if you want to use your own DB
 
+#Function for adding a product
 def add_product():
     name = input("Name: ")
     category = input("Category: ")
@@ -33,6 +36,7 @@ def add_product():
                VALUES (?, ?, ?);''', (name, category, price))
     db.commit()
 
+#Function for adding a new client
 def add_user():
     f_name = input("First name: ")
     l_name = input("Last name: ")
@@ -41,6 +45,7 @@ def add_user():
                VALUES (?, ?, ?);''', (f_name, l_name, email))
     db.commit()
 
+#Function for making an order
 def add_order():
     customer_id = int(input("Customer ID: "))
     product_id = int(input("Product ID: "))
@@ -50,12 +55,14 @@ def add_order():
                VALUES (?, ?, ?, ?);''', (customer_id, product_id, quantity, order_date))
     db.commit()
 
+#Function for showing the total income
 def income():
     info = db.execute('''SELECT SUM(o.quantity * p.price) 
                FROM orders o 
                INNER JOIN products p ON p.product_id == o.product_id;''')
     print(info.fetchone())
 
+#Function for showing the number of orders for each client
 def orders_by_customer():
     info = db.execute('''SELECT c.first_name, COUNT(o.order_id) 
                       FROM orders o 
@@ -63,12 +70,14 @@ def orders_by_customer():
                       GROUP BY c.first_name;''')
     print(info.fetchall())
 
+#Function for showing the average order price
 def avg_order_price():
     info = db.execute('''SELECT AVG(o.quantity * p.price)
                       FROM orders o
                       INNER JOIN products p ON o.product_id == p.product_id;''')
     print(info.fetchone())
 
+#Function for showing the category with the most products
 def popular_category():
     info = db.execute('''SELECT p.category, COUNT(o.order_id) AS order_count
                       FROM orders o
@@ -77,6 +86,7 @@ def popular_category():
                       ORDER BY order_count DESC;''')
     print(info.fetchone())
 
+#Function for showing total quantity of products in each category
 def category_quantity():
     info = db.execute('''SELECT COUNT(p.product_id) as amount, p.category 
                       FROM products p 
@@ -84,6 +94,7 @@ def category_quantity():
                       ORDER BY amount DESC;''')
     print(info.fetchall())
 
+#Function for increasing the price of all products in selected category by 10%
 def update_price():
     category = input("Category: ")
     db.execute('''UPDATE products
@@ -91,6 +102,7 @@ def update_price():
                WHERE category == (?)''', (category,))
     db.commit()
 
+#main loop
 while True:
     print('''
 Select an option:
@@ -98,12 +110,13 @@ Select an option:
 2 - Add a client
 3 - Order an item
 4 - View total income
-5 - View orders amount for each client
+5 - View the number of orders for each client
 6 - View average order price
 7 - View the most popular category
 8 - View total quantity of products for each category
 9 - Update prices by 10%
 0 - Exit''')
+    
     cmd = int(input("Choose an option: "))
 
     match cmd:
